@@ -1,0 +1,55 @@
+<resources>
+    <string name="app_name">GroupBored</string>
+
+    <string name="loginToGroupBored">Login to GroupBored</string>
+    <string name="signupForGroupBored">Signup for GroupBored</string>
+    <string name="username">Username</string>
+    <string name="usernameHint">Username&#8230;</string>
+    <string name="password">Password</string>
+    <string name="passwordHint">Password&#8230;</string>
+    <string name="confirmPassword">Confirm password</string>
+    <string name="confirmPasswordHint">Confirm&#8230;</string>
+    <string name="signup">Signup</string>
+    <string name="login">Login</string>
+    <string name="logout">Logout</string>
+    <string name="follow">Follow</string>
+    <string name="unfollow">Unfollow</string>
+
+    <string name="newPost">New Post</string>
+    <string name="enterYourPost">Enter your post</string>
+    <string name="newPostHint">New post&#8230;</string>
+    <string name="makePost">Make Post</string>
+
+    <string name="newComment">New Comment</string>
+    <string name="enterYourComment">Enter your comment</string>
+    <string name="newCommentHint">New comment&#8230;</string>
+    <string name="makeComment">Make Comment</string>
+
+    <string name="selectGroup">Select group</string>
+    <string name="selectAGroupToDisplayPosts">Select a group to display posts</string>
+
+    <string name="allPosts">All Posts</string>
+
+    <string name="noPostsFound">No posts found.</string>
+    <string name="loginToDoTheseThings">Login to make posts, vote on posts, follow users, and view your profile</string>
+    <string name="noComments">No comments</string>
+
+    <string name="updateBio">Update Bio</string>
+    <string name="enterYourBio">Enter your bio</string>
+    <string name="newBioHint">New bio&#8230;</string>
+    <string name="update">Update</string>
+
+    <string name="posted">Posted %1$s %2$s</string>
+    <string name="timestamp">\@ %1$s</string>
+    <string name="join_date">Joined %1$s</string>
+    <string name="favorite_group">Favorite group: %1$s</string>
+    <string name="num_posts">%1$s posts</string>
+
+    <string name="profilePictureDescription">The user\'s selected profile picture.</string>
+    <string name="dropdownImageDescription">Dropdown arrow for the group selection list.</string>
+    <string name="plusImageDescription">Icon shaped like a plus for a button to upvote the post.</string>
+    <string name="minusImageDescription">Icon shaped like a minus for a button to downvote the post.</string>
+    <string name="commentImageDescription">Icon shaped like a speech bubble for a button to make a comment on the post.</string>
+    <string name="postMoreImageDescription">Icon shaped like an ellipsis for a button to display more actions for the post.</string>
+    <string name="postImagesDescription">An image contained within the post, as uploaded by the user.</string>
+</resources>

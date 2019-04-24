@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="15dp"
+    android:paddingStart="15dp"
+    android:paddingRight="15dp"
+    android:paddingEnd="15dp" >
+
+    <ImageView
+        android:id="@+id/imageViewProfile"
+        android:contentDescription="@string/profilePictureDescription"
+        style="@style/imageViewProfile"
+        android:src="@drawable/profile" />
+
+    <LinearLayout
+        android:id="@+id/linearLayoutHeader"
+        style="@style/linearLayoutHorizontal"
+        android:layout_toEndOf="@id/imageViewProfile"
+        android:layout_toRightOf="@id/imageViewProfile" >
+
+        <TextView
+            android:id="@+id/textViewUsername"
+            style="@style/textViewPost"
+            android:textStyle="bold"
+            android:layout_marginStart="0dp"
+            android:layout_marginLeft="0dp" />
+
+        <TextView
+            android:id="@+id/textViewPostGroup"
+            style="@style/textViewPost" />
+
+        <TextView
+            android:id="@+id/textViewTimestamp"
+            style="@style/textViewPost"
+            android:gravity="center_vertical"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="8sp"
+            android:autoSizeMaxTextSize="14sp" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/textViewPostContents"
+        style="@style/textViewPost"
+        android:layout_below="@id/linearLayoutHeader"
+        android:layout_toEndOf="@id/imageViewProfile"
+        android:layout_toRightOf="@id/imageViewProfile"
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp" />
+
+    <ImageView
+        android:id="@+id/imageViewPost"
+        android:contentDescription="@string/postImagesDescription"
+        style="@style/imageViewPost"
+        android:layout_below="@id/textViewPostContents" />
+        <!--android:layout_alignStart="@id/textViewPostContents"
+        android:layout_alignLeft="@id/textViewPostContents"-->
+
+    <LinearLayout
+        style="@style/linearLayoutHorizontal"
+        android:layout_marginEnd="40dp"
+        android:layout_marginRight="40dp"
+        android:layout_alignStart="@id/textViewPostContents"
+        android:layout_alignLeft="@id/textViewPostContents"
+        android:layout_below="@id/imageViewPost" >
+
+        <ImageButton
+            android:id="@+id/imageViewPlus"
+            android:contentDescription="@string/plusImageDescription"
+            style="@style/imageViewBottom"
+            android:background="@drawable/button_selector" />
+
+        <TextView
+            android:id="@+id/textViewPlus"
+            style="@style/textViewBottom" />
+
+        <ImageButton
+            android:id="@+id/imageViewMinus"
+            android:contentDescription="@string/minusImageDescription"
+            style="@style/imageViewBottom"
+            android:background="@drawable/icon_minus_gray" />
+
+        <TextView
+            android:id="@+id/textViewMinus"
+            style="@style/textViewBottom" />
+
+        <ImageButton
+            android:id="@+id/imageViewComment"
+            android:contentDescription="@string/commentImageDescription"
+            style="@style/imageViewBottom"
+            android:background="@drawable/comment" />
+
+        <TextView style="@style/textViewBottom" />
+
+        <ImageButton
+            android:id="@+id/imageViewMore"
+            android:contentDescription="@string/postMoreImageDescription"
+            style="@style/imageViewBottom"
+            android:background="@drawable/more_dots" />
+    </LinearLayout>
+</RelativeLayout>
