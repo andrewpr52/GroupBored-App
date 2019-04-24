@@ -1,8 +1,8 @@
-# Project Title
+# GroupBored
 
 GroupBored - A Social Media Android Application
 
-## Getting Started
+## File Locations
 
-The Android Studio Java code is located at 
-The PHP code is located in the PHP folder.
+The PHP code is all located within the PHP folder.
+The Android Studio Java code is located at app/src/main/java/com/terminalreach/groupbored
