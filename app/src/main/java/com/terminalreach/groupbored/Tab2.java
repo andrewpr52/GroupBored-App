@@ -194,114 +194,111 @@ public class Tab2 extends Fragment {
         String hostname = "arodsg.com";
         String link;
 
-        SharedPreferences sp = getContext().getSharedPreferences("Login", MODE_PRIVATE);
-        String parentID;
+        SharedPreferences sp;
+        if (getContext() != null) {
+            sp = getContext().getSharedPreferences("Login", MODE_PRIVATE);
 
-        if (groupName == null || groupName.equals("All Posts")) {
-            link = "http://" + hostname + "/android_connect/get_all_posts.php";
-        }
-        else if (groupName.equals("Followed Users")) {
-            if (sp.contains("uid") && sp.contains("following") && sp.getStringSet("following", null).size() > 0) {
-                parentID = sp.getString("uid", null);
-                noPostsTv.setVisibility(View.GONE);
-                link = "http://" + hostname + "/android_connect/get_followed_user_posts.php?parentid=" + parentID;
+            String parentID;
+
+            if (groupName == null || groupName.equals("All Posts")) {
+                link = "http://" + hostname + "/android_connect/get_all_posts.php";
+            } else if (groupName.equals("Followed Users")) {
+                if (sp.contains("uid") && sp.contains("following") && sp.getStringSet("following", null) != null && sp.getStringSet("following", null).size() > 0) {
+                    parentID = sp.getString("uid", null);
+                    noPostsTv.setVisibility(View.GONE);
+                    link = "http://" + hostname + "/android_connect/get_followed_user_posts.php?parentid=" + parentID;
+                } else {
+                    noPostsTv.setVisibility(View.VISIBLE);
+                    link = null;
+                }
+            } else {
+                link = "http://" + hostname + "/android_connect/get_group_posts.php?group=" + groupName;
             }
-            else {
-                noPostsTv.setVisibility(View.VISIBLE);
-                link = null;
-            }
-        }
-        else {
-            link = "http://" + hostname + "/android_connect/get_group_posts.php?group=" + groupName;
-        }
 
-        if (link != null) {
-            GetPostActivity postActivity = new GetPostActivity(link);
-
-            try {
-                String result = postActivity.execute().get();
+            if (link != null) {
+                GetPostActivity postActivity = new GetPostActivity(link);
 
                 try {
-                    JSONObject object = new JSONObject(result);
-                    final JSONArray postArray = object.getJSONArray("post").getJSONArray(0);
+                    String result = postActivity.execute().get();
 
-                    if (firstCreation) {
-                        postEnd = postArray.length();
-                        postStart = postEnd - 25;
-                        firstCreation = false;
-                    }
+                    try {
+                        JSONObject object = new JSONObject(result);
+                        final JSONArray postArray = object.getJSONArray("post").getJSONArray(0);
 
-                    if (postStart < 0) {
-                        postStart = 0;
-                        loadMoreElements = false;
-                    }
+                        if (firstCreation) {
+                            postEnd = postArray.length();
+                            postStart = postEnd - 25;
+                            firstCreation = false;
+                        }
 
-                    if (getActivity() != null) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (postArray.length() == 0) {
-                                    noPostsTv.setVisibility(View.VISIBLE);
-                                } else {
-                                    noPostsTv.setVisibility(View.GONE);
+                        if (postStart < 0) {
+                            postStart = 0;
+                            loadMoreElements = false;
+                        }
+
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (postArray.length() == 0) {
+                                        noPostsTv.setVisibility(View.VISIBLE);
+                                    } else {
+                                        noPostsTv.setVisibility(View.GONE);
+                                    }
                                 }
+                            });
+                        }
+
+                        for (int i = postArray.length() - 1; i >= postStart; i--) {
+                            JSONObject post = postArray.getJSONObject(i);
+
+                            final int postID = post.getInt("ID");
+                            String timestamp = post.getString("Timestamp");
+                            String group = post.getString("GroupName");
+                            String username = post.getString("Username");
+                            String contents = post.getString("Contents");
+                            int upvotes = post.getInt("Upvotes");
+                            int downvotes = post.getInt("Downvotes");
+                            String profilePictureURL;
+                            if (post.has("ProfilePictureURL")) {
+                                profilePictureURL = post.getString("ProfilePictureURL");
+                            } else {
+                                profilePictureURL = "";
                             }
-                        });
-                    }
 
-                    for (int i = postArray.length() - 1; i >= postStart; i--) {
-                        JSONObject post = postArray.getJSONObject(i);
-
-                        final int postID = post.getInt("ID");
-                        String timestamp = post.getString("Timestamp");
-                        String group = post.getString("GroupName");
-                        String username = post.getString("Username");
-                        String contents = post.getString("Contents");
-                        int upvotes = post.getInt("Upvotes");
-                        int downvotes = post.getInt("Downvotes");
-                        String profilePictureURL;
-                        if (post.has("ProfilePictureURL")) {
-                            profilePictureURL = post.getString("ProfilePictureURL");
-                        }
-                        else {
-                            profilePictureURL = "";
+                            listPostRow.add(new PostRow(
+                                    postID,
+                                    profilePictureURL,
+                                    username,
+                                    timestamp,
+                                    group,
+                                    contents,
+                                    null,
+                                    upvotes,
+                                    downvotes)
+                            );
                         }
 
-                        listPostRow.add(new PostRow(
-                                postID,
-                                profilePictureURL,
-                                username,
-                                timestamp,
-                                group,
-                                contents,
-                                null,
-                                upvotes,
-                                downvotes)
-                        );
+                        postEnd = postStart;
+                        postStart = postEnd - 25;
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+
+                        String toastMessage = "Error retrieving data from server.";
+                        displayToastMessage(toastMessage);
                     }
 
-                    postEnd = postStart;
-                    postStart = postEnd - 25;
-                }
-                catch (JSONException e) {
+                } catch (InterruptedException e) {
                     e.printStackTrace();
 
-                    String toastMessage = "Error retrieving data from server.";
+                    String toastMessage = "Error retrieving posts, please try again.";
+                    displayToastMessage(toastMessage);
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+
+                    String toastMessage = "Error retrieving posts, please try again.";
                     displayToastMessage(toastMessage);
                 }
-
-            }
-            catch (InterruptedException e) {
-                e.printStackTrace();
-
-                String toastMessage = "Error retrieving posts, please try again.";
-                displayToastMessage(toastMessage);
-            }
-            catch (ExecutionException e) {
-                e.printStackTrace();
-
-                String toastMessage = "Error retrieving posts, please try again.";
-                displayToastMessage(toastMessage);
             }
         }
 
