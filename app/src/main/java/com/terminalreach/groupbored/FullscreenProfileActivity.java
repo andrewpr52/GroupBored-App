@@ -141,7 +141,14 @@ public class FullscreenProfileActivity extends AppCompatActivity {
             logoutButton.setVisibility(View.GONE);
             followButton.setVisibility(View.VISIBLE);
 
-            final boolean isFollowing = followedUserIDs.contains(profileUserID);
+            boolean isFollowing;
+
+            if (followedUserIDs != null) {
+                isFollowing = followedUserIDs.contains(profileUserID);
+            }
+            else {
+                isFollowing = false;
+            }
 
             // checks if the logged-in user is currently following the user whose profile they're viewing
             if (isFollowing) {

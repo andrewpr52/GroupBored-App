@@ -133,11 +133,6 @@ public class SignupActivity extends AppCompatActivity {
                         String bio = user.getString("UserBio");
                         String joinDate = user.getString("JoinDate");
 
-
-
-
-
-
                         SharedPreferences sp = getSharedPreferences("Login", MODE_PRIVATE);
                         SharedPreferences.Editor Ed = sp.edit();
                         Ed.putString("uid", Integer.toString(uid));
@@ -146,7 +141,6 @@ public class SignupActivity extends AppCompatActivity {
                         Ed.putString("bio", bio);
                         Ed.putString("joindate", joinDate);
                         Ed.apply();
-
 
                         Intent intent = new Intent();
                         setResult(RESULT_OK, intent);

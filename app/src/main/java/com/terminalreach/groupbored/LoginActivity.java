@@ -186,7 +186,6 @@ public class LoginActivity extends AppCompatActivity {
                         Ed.putStringSet("following", following);
                         Ed.apply();
 
-
                         Intent intent = new Intent();
                         setResult(RESULT_OK, intent);
                         finish();
