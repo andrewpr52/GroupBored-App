@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "739922629542",
+    "firebase_url": "https://groupbored.firebaseio.com",
+    "project_id": "groupbored",
+    "storage_bucket": "groupbored.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:739922629542:android:b830534ace42bae5",
+        "android_client_info": {
+          "package_name": "com.terminalreach.groupbored"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "739922629542-sfm4pb7h3m2bh382uj9tj8rhbgsnm5t1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.terminalreach.groupbored",
+            "certificate_hash": "27039195e741d96c0182cf38f2acbd044282ade9"
+          }
+        },
+        {
+          "client_id": "739922629542-jaeblflq4bkocf2k2b9rmaulju5laj7h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAzUJKbdM0wNYfaNDJ2dn3--pW3c-eNn4Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "739922629542-jaeblflq4bkocf2k2b9rmaulju5laj7h.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

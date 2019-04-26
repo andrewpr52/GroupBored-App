@@ -345,7 +345,7 @@ public class Tab3 extends Fragment {
                     profileBioTv.setText(bio);
 
                     if (profilePictureURL.isEmpty()) {
-                        Picasso.with(getContext())
+                        Picasso.get()
                                 .load(R.drawable.profile)
                                 .placeholder(R.drawable.profile)
                                 .error(R.drawable.profile)
@@ -353,7 +353,7 @@ public class Tab3 extends Fragment {
                                 .into(profileImageIv);
                     }
                     else {
-                        Picasso.with(getContext())
+                        Picasso.get()
                                 .load(profilePictureURL)
                                 .placeholder(R.drawable.profile)
                                 .error(R.drawable.profile)

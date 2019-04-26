@@ -63,7 +63,7 @@ public class FullscreenPostActivity extends AppCompatActivity {
         TextView postContentsTv = findViewById(R.id.fullscreen_post_contents);
 
         if (profilePictureURL.isEmpty()) {
-            Picasso.with(getBaseContext())
+            Picasso.get()
                     .load(R.drawable.profile)
                     .placeholder(R.drawable.profile)
                     .error(R.drawable.profile)
@@ -73,7 +73,7 @@ public class FullscreenPostActivity extends AppCompatActivity {
                     .into(profileIv);
         }
         else {
-            Picasso.with(getBaseContext())
+            Picasso.get()
                     .load(profilePictureURL)
                     .placeholder(R.drawable.profile)
                     .error(R.drawable.profile)

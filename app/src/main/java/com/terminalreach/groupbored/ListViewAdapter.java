@@ -22,8 +22,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.squareup.picasso.Picasso;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,6 +31,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
+import com.squareup.picasso.Picasso;
 import jp.wasabeef.picasso.transformations.CropSquareTransformation;
 import jp.wasabeef.picasso.transformations.RoundedCornersTransformation;
 
@@ -287,13 +286,13 @@ public class ListViewAdapter extends BaseAdapter {
 
             final PostRow postRow = listPostRows.get(position);
 
+            final SharedPreferences sp = context.getSharedPreferences("Login", MODE_PRIVATE);
             viewHolder.imageViewComment.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     //Detects when an individual post is clicked on.
                     //Can pass the clicked post's information and start an activity that displays the post in fullscreen.
 
-                    SharedPreferences sp = context.getSharedPreferences("Login", MODE_PRIVATE);
                     if (sp.contains("uname") && sp.contains("pword")) {
                         Intent intent = new Intent(activity, FullscreenPostActivity.class);
                         //intent.putExtra("profileImage", viewHolder.imageViewProfile);
@@ -318,7 +317,13 @@ public class ListViewAdapter extends BaseAdapter {
             viewHolder.imageViewMore.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    showPopup(v, viewHolder.postID);
+                    if (sp.contains("uname") && sp.contains("pword")) {
+                        showPopup(v, viewHolder.postID, postRow.getUsername());
+                    }
+                    else {
+                        ViewPager mPager = activity.findViewById(R.id.pager);
+                        mPager.setCurrentItem(2);
+                    }
                 }
             });
 
@@ -331,7 +336,7 @@ public class ListViewAdapter extends BaseAdapter {
         final PostRow postRow = listPostRows.get(position);
 
         if (postRow.getImageURL().isEmpty()) {
-            Picasso.with(context)
+            Picasso.get()
                     .load(R.drawable.profile)
                     .placeholder(R.drawable.profile)
                     .error(R.drawable.profile)
@@ -341,7 +346,7 @@ public class ListViewAdapter extends BaseAdapter {
                     .into(viewHolder.imageViewProfile);
         }
         else {
-            Picasso.with(context)
+            Picasso.get()
                     .load(postRow.getImageURL())
                     .placeholder(R.drawable.profile)
                     .error(R.drawable.profile)
@@ -427,27 +432,71 @@ public class ListViewAdapter extends BaseAdapter {
         return convertView;
     }
 
-    private void showPopup(View v, final int postID) {
+    private void showPopup(View v, final int postID, String username) {
         PopupMenu popup = new PopupMenu(v.getContext(), v);
         MenuInflater inflater = popup.getMenuInflater();
         inflater.inflate(R.menu.menu_more_options, popup.getMenu());
+
+        MenuItem item;
+        SharedPreferences sp = context.getSharedPreferences("Login", MODE_PRIVATE);
+        if (sp.getString("uname", null) != null) {
+            if (sp.getString("uname", null).equals(username)) {
+                item = popup.getMenu().getItem(0);
+            }
+            else {
+                item = popup.getMenu().getItem(1);
+            }
+        }
+        else {
+            item = popup.getMenu().getItem(1);
+        }
+        item.setVisible(false);
+
         popup.show();
 
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
-                SharedPreferences sp = context.getSharedPreferences("Login", MODE_PRIVATE);
-                if (sp.contains("uname") && sp.contains("pword")) {
-                    Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(
-                            "mailto","sappi.ws.1@gmail.com", null));
-                    intent.putExtra(Intent.EXTRA_SUBJECT, "Post Report");
-                    String messagePlaceholder = "Post ID: " + Integer.toString(postID) + "\n---Enter report reason below---";
-                    intent.putExtra(Intent.EXTRA_TEXT, messagePlaceholder);
-                    activity.startActivity(intent);
+                if (menuItem.getTitle().equals("Report")) {
+                    SharedPreferences sp = context.getSharedPreferences("Login", MODE_PRIVATE);
+                    if (sp.contains("uname") && sp.contains("pword")) {
+                        Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(
+                                "mailto", "terminalreach@gmail.com", null));
+                        intent.putExtra(Intent.EXTRA_SUBJECT, "Post Report");
+                        String messagePlaceholder = "Post ID: " + postID + "\n---Enter report reason below---";
+                        intent.putExtra(Intent.EXTRA_TEXT, messagePlaceholder);
+                        activity.startActivity(intent);
+                    } else {
+                        ViewPager mPager = activity.findViewById(R.id.pager);
+                        mPager.setCurrentItem(2);
+                    }
                 }
-                else {
-                    ViewPager mPager = activity.findViewById(R.id.pager);
-                    mPager.setCurrentItem(2);
+                else if (menuItem.getTitle().equals("Delete")) {
+                    // call DeletePostActivity async class
+                    try {
+                        String result = new DeletePostActivity(context).execute(postID).get();
+
+                        try {
+                            JSONObject object = new JSONObject(result);
+                            String message = object.getString("message");
+                            displayToastMessage(message);
+                        }
+                        catch (JSONException e) {
+                            e.printStackTrace();
+                            String toastMessage = "Error deleting the post from the server, please try again.";
+                            displayToastMessage(toastMessage);
+                        }
+                    }
+                    catch (InterruptedException i) {
+                        i.printStackTrace();
+                        String toastMessage = "Error deleting the post from the server, please try again.";
+                        displayToastMessage(toastMessage);
+                    }
+                    catch (ExecutionException e) {
+                        e.printStackTrace();
+                        String toastMessage = "Error deleting the post from the server, please try again.";
+                        displayToastMessage(toastMessage);
+                    }
                 }
 
                 return true;

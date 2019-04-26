@@ -17,11 +17,10 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
-
-import java.util.List;
-
 import jp.wasabeef.picasso.transformations.CropSquareTransformation;
 import jp.wasabeef.picasso.transformations.RoundedCornersTransformation;
+
+import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -98,7 +97,7 @@ public class ListViewCommentAdapter extends BaseAdapter {
         CommentRow commentRow = listCommentRows.get(position);
 
         if (commentRow.getImageURL().isEmpty()) {
-            Picasso.with(context)
+            Picasso.get()
                     .load(R.drawable.profile)
                     .placeholder(R.drawable.profile)
                     .error(R.drawable.profile)
@@ -108,7 +107,7 @@ public class ListViewCommentAdapter extends BaseAdapter {
                     .into(viewHolder.imageViewProfile);
         }
         else {
-            Picasso.with(context)
+            Picasso.get()
                     .load(commentRow.getImageURL())
                     .placeholder(R.drawable.profile)
                     .error(R.drawable.profile)

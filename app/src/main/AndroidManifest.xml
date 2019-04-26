@@ -7,7 +7,9 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-feature android:name="android.hardware.camera"
+
+    <uses-feature
+        android:name="android.hardware.camera"
         android:required="true" />
 
     <application
@@ -17,66 +19,80 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:usesCleartextTraffic="true" >
+        android:usesCleartextTraffic="true">
+
+        <service
+            android:name=".NotificationService"
+            android:enabled="true"
+            android:exported="true" />
+        <meta-data android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/logo_small_primary" />
+        <meta-data    android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/colorPrimary" />
+
         <uses-library
             android:name="org.apache.http.legacy"
-            android:required="false"/>
-        <activity android:name="com.terminalreach.groupbored.SplashActivity"
-            android:theme="@style/SplashTheme"
-            android:configChanges="orientation|keyboard|keyboardHidden|screenSize" >
+            android:required="false" />
+
+        <activity
+            android:name=".SplashActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden|screenSize"
+            android:theme="@style/SplashTheme">
             <intent-filter>
-                <action
-                    android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.terminalreach.groupbored.LoginActivity"
-            android:theme="@style/ActionBarAppTheme"
-            android:configChanges="orientation|keyboard|keyboardHidden|screenSize" >
-        </activity>
-        <activity android:name="com.terminalreach.groupbored.SignupActivity"
-            android:theme="@style/ActionBarAppTheme"
-            android:configChanges="orientation|keyboard|keyboardHidden|screenSize" >
-        </activity>
-        <activity android:name="com.terminalreach.groupbored.MainActivity"
-            android:configChanges="orientation|keyboard|keyboardHidden|screenSize" >
+        <activity
+            android:name=".LoginActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden|screenSize"
+            android:theme="@style/ActionBarAppTheme" />
+        <activity
+            android:name=".SignupActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden|screenSize"
+            android:theme="@style/ActionBarAppTheme" />
+        <activity
+            android:name=".MainActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden|screenSize">
             <intent-filter>
-                <action
-                    android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
-        <activity android:name="com.terminalreach.groupbored.NewPostActivity"
-            android:theme="@style/ActionBarAppTheme"
-            android:configChanges="orientation|keyboard|keyboardHidden|screenSize" >
+        <activity
+            android:name=".NewPostActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden|screenSize"
+            android:theme="@style/ActionBarAppTheme">
             <intent-filter>
-                <action
-                    android:name="android.intent.action.NEWPOST" />
+                <action android:name="android.intent.action.NEWPOST" />
             </intent-filter>
         </activity>
-        <activity android:name="com.terminalreach.groupbored.NewCommentActivity"
-            android:theme="@style/ActionBarAppTheme"
-            android:configChanges="orientation|keyboard|keyboardHidden|screenSize" >
+        <activity
+            android:name=".NewCommentActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden|screenSize"
+            android:theme="@style/ActionBarAppTheme">
             <intent-filter>
-                <action
-                    android:name="android.intent.action.NEWCOMMENT" />
+                <action android:name="android.intent.action.NEWCOMMENT" />
             </intent-filter>
         </activity>
-        <activity android:name="com.terminalreach.groupbored.FullscreenPostActivity"
-            android:theme="@style/ActionBarAppTheme"
-            android:configChanges="orientation|keyboard|keyboardHidden|screenSize" >
+        <activity
+            android:name=".FullscreenPostActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden|screenSize"
+            android:theme="@style/ActionBarAppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
             </intent-filter>
         </activity>
-        <activity android:name="com.terminalreach.groupbored.FullscreenProfileActivity"
-            android:theme="@style/ActionBarAppTheme"
-            android:configChanges="orientation|keyboard|keyboardHidden|screenSize" >
-        </activity>
-        <activity android:name="com.terminalreach.groupbored.ChangeBioActivity"
-            android:theme="@style/ActionBarAppTheme"
-            android:configChanges="orientation|keyboard|keyboardHidden|screenSize" >
-        </activity>
-        <activity android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
+        <activity
+            android:name=".FullscreenProfileActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden|screenSize"
+            android:theme="@style/ActionBarAppTheme" />
+        <activity
+            android:name=".ChangeBioActivity"
+            android:configChanges="orientation|keyboard|keyboardHidden|screenSize"
+            android:theme="@style/ActionBarAppTheme" />
+        <activity
+            android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
             android:theme="@style/ActionBarAppTheme" />
     </application>
 

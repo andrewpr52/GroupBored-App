@@ -54,6 +54,8 @@ public class NewCommentActivity extends AppCompatActivity {
                         toast.show();
 
                         if (success.equals("1")) {
+                            //handle push notification for the receiving user.
+
                             Intent intent = new Intent();
                             setResult(RESULT_OK, intent);
                             finish();

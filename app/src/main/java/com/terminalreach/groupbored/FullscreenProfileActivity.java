@@ -271,7 +271,7 @@ public class FullscreenProfileActivity extends AppCompatActivity {
                 profileBioTv.setText(bio);
 
                 if (profilePictureURL.isEmpty()) {
-                    Picasso.with(getBaseContext())
+                    Picasso.get()
                             .load(R.drawable.profile)
                             .placeholder(R.drawable.profile)
                             .error(R.drawable.profile)
@@ -279,7 +279,7 @@ public class FullscreenProfileActivity extends AppCompatActivity {
                             .into(profileImageIv);
                 }
                 else {
-                    Picasso.with(getBaseContext())
+                    Picasso.get()
                             .load(profilePictureURL)
                             .placeholder(R.drawable.profile)
                             .error(R.drawable.profile)
