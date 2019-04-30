@@ -29,7 +29,6 @@ public class CreateCommentActivity extends AsyncTask<String, String, String> {
 
             String link = "http://" + hostname + "/android_connect/create_comment.php?postid=" + postID + "&username=" + username + "&contents=" + URLEncoder.encode(commentText, "UTF-8");
 
-
             URI uri = new URI(link);
             link = uri.toASCIIString();
             URI uri2 = new URI(link);

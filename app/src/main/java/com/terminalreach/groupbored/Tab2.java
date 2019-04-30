@@ -1,8 +1,11 @@
 package com.terminalreach.groupbored;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -168,25 +171,31 @@ public class Tab2 extends Fragment {
     }
 
     private void createListView(final View v, final String group) {
-        listPostRow.clear();
-        listPostRow = createPostList(group);
+        if (checkNetworkConnection()) {
+            listPostRow.clear();
+            listPostRow = createPostList(group);
+            if (getContext() != null) {
+                listViewAdapter = new ListViewAdapter(getContext(), getActivity(), listPostRow);
+            }
+        }
+        else {
+            String message = "No internet connection. Please try again.";
+            displayToastMessage(message);
+        }
+
         holder = v.findViewById(R.id.feed_list_view);
 
-        if (getContext() != null) {
-            listViewAdapter = new ListViewAdapter(getContext(), getActivity(), listPostRow);
-
-            if (getActivity() != null) {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        holder.removeAllViews();
-                        for (int i = 0; i < listPostRow.size(); i++) {
-                            holder.addView(listViewAdapter.getView(i, null, holder));
-                        }
-                        swipeRefresh.setRefreshing(false);
+        if (getActivity() != null) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    holder.removeAllViews();
+                    for (int i = 0; i < listPostRow.size(); i++) {
+                        holder.addView(listViewAdapter.getView(i, null, holder));
                     }
-                });
-            }
+                    swipeRefresh.setRefreshing(false);
+                }
+            });
         }
     }
 
@@ -205,10 +214,8 @@ public class Tab2 extends Fragment {
             } else if (groupName.equals("Followed Users")) {
                 if (sp.contains("uid") && sp.contains("following") && sp.getStringSet("following", null) != null && sp.getStringSet("following", null).size() > 0) {
                     parentID = sp.getString("uid", null);
-                    noPostsTv.setVisibility(View.GONE);
                     link = "http://" + hostname + "/android_connect/get_followed_user_posts.php?parentid=" + parentID;
                 } else {
-                    noPostsTv.setVisibility(View.VISIBLE);
                     link = null;
                 }
             } else {
@@ -305,11 +312,33 @@ public class Tab2 extends Fragment {
         return listPostRow;
     }
 
-    private void displayToastMessage(String message) {
-        Toast toast = Toast.makeText(getContext(), message, Toast.LENGTH_SHORT);
-        TextView v = toast.getView().findViewById(android.R.id.message);
-        toast.setGravity(Gravity.CENTER,0,0);
-        if( v != null) v.setGravity(Gravity.CENTER);
-        toast.show();
+    public boolean checkNetworkConnection() {
+        boolean connected = false;
+
+        if (getActivity() != null) {
+            ConnectivityManager connectivityManager = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+            if (connectivityManager != null) {
+                if (connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED || connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED) {
+                    //we are connected to a network
+                    connected = true;
+                }
+            }
+        }
+        return connected;
+    }
+
+    private void displayToastMessage(final String message) {
+        if (getActivity() != null) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast toast = Toast.makeText(getContext(), message, Toast.LENGTH_SHORT);
+                    TextView v = toast.getView().findViewById(android.R.id.message);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    if (v != null) v.setGravity(Gravity.CENTER);
+                    toast.show();
+                }
+            });
+        }
     }
 }

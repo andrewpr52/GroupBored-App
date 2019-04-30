@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -17,6 +19,8 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Base64;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +28,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
@@ -31,6 +36,13 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 import com.squareup.picasso.Picasso;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
@@ -80,7 +92,10 @@ public class Tab3 extends Fragment {
 
     List<PostRow> listPostRow = new ArrayList<>();
 
+    private TextView noPostsTv;
     private SwipeRefreshLayout swipeRefresh;
+
+    private FirebaseAuth mAuth;
 
     public Tab3() {
         // Required empty public constructor
@@ -89,6 +104,7 @@ public class Tab3 extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mAuth = FirebaseAuth.getInstance();
     }
 
     @Override
@@ -96,7 +112,7 @@ public class Tab3 extends Fragment {
                              Bundle savedInstanceState) {
         final View rootView;
 
-        SharedPreferences sp = getContext().getSharedPreferences("Login", MODE_PRIVATE);
+        final SharedPreferences sp = getContext().getSharedPreferences("Login", MODE_PRIVATE);
 
         if (sp.contains("uname") && sp.contains("pword")) {
             rootView = inflater.inflate(R.layout.fragment_tab_profile, container, false);
@@ -113,6 +129,8 @@ public class Tab3 extends Fragment {
             profileNumPostsTv = rootView.findViewById(R.id.textViewProfileNumPosts);
             profileBioTv = rootView.findViewById(R.id.textViewProfileBio);
             profileUsername = sp.getString("uname", null);
+
+            noPostsTv = rootView.findViewById(R.id.noPostsTextViewProfile);
 
             getUserProfileInfo(profileUsername);
             setProfileInfo(rootView, profileUsername, profileJoinDate, profileFavoriteGroup, profileNumPosts, profileBio, profilePictureURL);
@@ -140,9 +158,28 @@ public class Tab3 extends Fragment {
             logoutButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (getContext() != null) {
-                        getContext().getSharedPreferences("Login", 0).edit().clear().apply();
-                    }
+                    FirebaseInstanceId.getInstance().getInstanceId()
+                            .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                                @Override
+                                public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                                    if (!task.isSuccessful()) {
+                                        Log.w("firebaseTokenTag", "getInstanceId failed", task.getException());
+                                        return;
+                                    }
+
+                                    if (task.getResult() != null) {
+                                        // Get new Instance ID token
+                                        String userID = sp.getString("uid", null);
+                                        String username = sp.getString("uname", null);
+                                        Log.d("firebaseTokenUserID", username + "");
+                                        String token = task.getResult().getToken();
+                                        removeToken(username, token);
+                                        if (getContext() != null) {
+                                            getContext().getSharedPreferences("Login", 0).edit().clear().apply();
+                                        }
+                                    }
+                                }
+                            });
 
                     Intent intent = new Intent(getActivity(), MainActivity.class);
                     startActivity(intent);
@@ -344,7 +381,7 @@ public class Tab3 extends Fragment {
                     profileNumPostsTv.setText(numPostsText);
                     profileBioTv.setText(bio);
 
-                    if (profilePictureURL.isEmpty()) {
+                    if (profilePictureURL == null || profilePictureURL.isEmpty()) {
                         Picasso.get()
                                 .load(R.drawable.profile)
                                 .placeholder(R.drawable.profile)
@@ -366,36 +403,42 @@ public class Tab3 extends Fragment {
     }
 
     private void createListView(final View v) {
-        listPostRow.clear();
-        listPostRow = createPostList();
+        if (checkNetworkConnection()) {
+            listPostRow.clear();
+            listPostRow = createPostList();
+            if (getContext() != null) {
+                listViewAdapter = new ListViewAdapter(getContext(), getActivity(), listPostRow);
+            }
+        }
+        else {
+            String message = "No internet connection. Please try again.";
+            displayToastMessage(message);
+        }
+
         holder = v.findViewById(R.id.profile_list_view);
 
-        if (getContext() != null) {
-            listViewAdapter = new ListViewAdapter(getContext(), getActivity(), listPostRow);
+        if (getActivity() != null) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    // Sets the user's post score by adding all of their post's plus ratings and subtracting minus ratings
+                    //int postScore = 0;
 
-            if (getActivity() != null) {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        // Sets the user's post score by adding all of their post's plus ratings and subtracting minus ratings
-                        //int postScore = 0;
-
-                        if (holder != null) {
-                            holder.removeAllViews();
-                            for (int i = 0; i < listPostRow.size(); i++) {
-                                holder.addView(listViewAdapter.getView(i, null, holder));
-                                //postScore += listPostRow.get(i).getPosRatingCount();
-                                //postScore -= listPostRow.get(i).getNegRatingCount();
-                            }
+                    if (holder != null) {
+                        holder.removeAllViews();
+                        for (int i = 0; i < listPostRow.size(); i++) {
+                            holder.addView(listViewAdapter.getView(i, null, holder));
+                            //postScore += listPostRow.get(i).getPosRatingCount();
+                            //postScore -= listPostRow.get(i).getNegRatingCount();
                         }
-                        swipeRefresh.setRefreshing(false);
-
-                        //TextView textViewPostScore = v.findViewById(R.id.textViewProfilePostScore);
-                        //String postScoreText = postScore + " post score";
-                        //textViewPostScore.setText(postScoreText);
                     }
-                });
-            }
+                    swipeRefresh.setRefreshing(false);
+
+                    //TextView textViewPostScore = v.findViewById(R.id.textViewProfilePostScore);
+                    //String postScoreText = postScore + " post score";
+                    //textViewPostScore.setText(postScoreText);
+                }
+            });
         }
     }
 
@@ -411,7 +454,7 @@ public class Tab3 extends Fragment {
 
             try {
                 JSONObject object = new JSONObject(result);
-                JSONArray postArray = object.getJSONArray("post").getJSONArray(0);
+                final JSONArray postArray = object.getJSONArray("post").getJSONArray(0);
 
                 if (firstCreation) {
                     postEnd = postArray.length();
@@ -422,6 +465,19 @@ public class Tab3 extends Fragment {
                 if (postStart < 0) {
                     postStart = 0;
                     loadMoreElements = false;
+                }
+
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (postArray.length() == 0) {
+                                noPostsTv.setVisibility(View.VISIBLE);
+                            } else {
+                                noPostsTv.setVisibility(View.GONE);
+                            }
+                        }
+                    });
                 }
 
                 for (int i = postArray.length() - 1; i >= postStart; i--) {
@@ -538,6 +594,46 @@ public class Tab3 extends Fragment {
             };
             request.setRetryPolicy(new DefaultRetryPolicy(10000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
             requestQueue.add(request);
+        }
+    }
+
+    public boolean checkNetworkConnection() {
+        boolean connected = false;
+
+        if (getActivity() != null) {
+            ConnectivityManager connectivityManager = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+            if (connectivityManager != null) {
+                if (connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED || connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED) {
+                    //we are connected to a network
+                    connected = true;
+                }
+            }
+        }
+        return connected;
+    }
+
+    // Updates Firebase Realtime Database with the appropriate user token
+    private void removeToken(String username, String token) {
+        final FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference ref = database.getReference("users");
+
+        Log.d("firebaseTokenUserID", username + "");
+        Log.d("firebaseTokenUserID", token);
+        ref.child(username).child("tokens").child(token).removeValue();
+    }
+
+    private void displayToastMessage(final String message) {
+        if (getActivity() != null) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast toast = Toast.makeText(getContext(), message, Toast.LENGTH_SHORT);
+                    TextView v = toast.getView().findViewById(android.R.id.message);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    if (v != null) v.setGravity(Gravity.CENTER);
+                    toast.show();
+                }
+            });
         }
     }
 }

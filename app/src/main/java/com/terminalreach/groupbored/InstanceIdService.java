@@ -2,6 +2,8 @@ package com.terminalreach.groupbored;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
+import com.google.firebase.messaging.FirebaseMessagingService;
+import com.google.firebase.messaging.RemoteMessage;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -13,46 +15,15 @@ import java.net.URL;
  * Created by What's That Lambda on 11/6/17.
  */
 
-public class InstanceIdService extends FirebaseInstanceIdService {
-    public InstanceIdService() {
-        super();
-    }
-
+public class InstanceIdService extends FirebaseMessagingService {
     @Override
-    public void onTokenRefresh() {
-        super.onTokenRefresh();
-        String token = FirebaseInstanceId.getInstance().getToken();
+    public void onMessageReceived(RemoteMessage remoteMessage) {
+        super.onMessageReceived(remoteMessage);
 
-        //sends this token to the server
-        sendToServer(token);
-    }
+        if (remoteMessage.getNotification() != null) {
+            String title = remoteMessage.getNotification().getTitle();
+            String text = remoteMessage.getNotification().getBody();
 
-    private void sendToServer(String token) {
-
-        try {
-            URL url = new URL("https://www.whatsthatlambda.com/store");
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-
-            connection.setDoOutput(true);
-            connection.setDoInput(true);
-
-            connection.setRequestMethod("POST");
-
-            DataOutputStream dos = new DataOutputStream(connection.getOutputStream());
-
-            dos.writeBytes("token=" + token);
-
-            connection.connect();
-
-            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                // Do whatever you want after the
-                // token is successfully stored on the server
-            }
-
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 }

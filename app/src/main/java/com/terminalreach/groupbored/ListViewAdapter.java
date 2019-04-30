@@ -1,12 +1,15 @@
 package com.terminalreach.groupbored;
 
 import android.app.Activity;
+import android.support.v7.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.support.v4.view.ViewPager;
 import android.text.Html;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -15,8 +18,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -27,10 +32,21 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.RetryPolicy;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.squareup.picasso.Picasso;
 import jp.wasabeef.picasso.transformations.CropSquareTransformation;
 import jp.wasabeef.picasso.transformations.RoundedCornersTransformation;
@@ -405,8 +421,6 @@ public class ListViewAdapter extends BaseAdapter {
             @Override
             public void onClick(View v) {
                 //Detects when an individual post is clicked on.
-                //Can pass the clicked post's information and start an activity that displays the post in fullscreen.
-
                 SharedPreferences sp = context.getSharedPreferences("Login", MODE_PRIVATE);
                 if (sp.contains("uname") && sp.contains("pword")) {
                     Intent intent = new Intent(activity, FullscreenPostActivity.class);
@@ -472,31 +486,51 @@ public class ListViewAdapter extends BaseAdapter {
                     }
                 }
                 else if (menuItem.getTitle().equals("Delete")) {
-                    // call DeletePostActivity async class
-                    try {
-                        String result = new DeletePostActivity(context).execute(postID).get();
+                    AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AlertDialog)
+                            .setMessage("Are you sure you want to permanently delete this post and all of its comments?")
+                            .setCancelable(false)
+                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface arg0, int arg1) {
+                                    // call DeletePostActivity async class
+                                    try {
+                                        String result = new DeletePostActivity(context).execute(postID).get();
 
-                        try {
-                            JSONObject object = new JSONObject(result);
-                            String message = object.getString("message");
-                            displayToastMessage(message);
-                        }
-                        catch (JSONException e) {
-                            e.printStackTrace();
-                            String toastMessage = "Error deleting the post from the server, please try again.";
-                            displayToastMessage(toastMessage);
-                        }
-                    }
-                    catch (InterruptedException i) {
-                        i.printStackTrace();
-                        String toastMessage = "Error deleting the post from the server, please try again.";
-                        displayToastMessage(toastMessage);
-                    }
-                    catch (ExecutionException e) {
-                        e.printStackTrace();
-                        String toastMessage = "Error deleting the post from the server, please try again.";
-                        displayToastMessage(toastMessage);
-                    }
+                                        try {
+                                            JSONObject object = new JSONObject(result);
+                                            String message = object.getString("message");
+                                            displayToastMessage(message);
+                                        }
+                                        catch (JSONException e) {
+                                            e.printStackTrace();
+                                            String toastMessage = "Error deleting the post from the server, please try again.";
+                                            displayToastMessage(toastMessage);
+                                        }
+                                    }
+                                    catch (InterruptedException i) {
+                                        i.printStackTrace();
+                                        String toastMessage = "Error deleting the post from the server, please try again.";
+                                        displayToastMessage(toastMessage);
+                                    }
+                                    catch (ExecutionException e) {
+                                        e.printStackTrace();
+                                        String toastMessage = "Error deleting the post from the server, please try again.";
+                                        displayToastMessage(toastMessage);
+                                    }
+                                }
+                            })
+                            .setNegativeButton("No", null);
+                    AlertDialog alert = builder.create();
+                    alert.show();
+
+                    Button negativeButton = alert.getButton(DialogInterface.BUTTON_NEGATIVE);
+                    Button positiveButton = alert.getButton(DialogInterface.BUTTON_POSITIVE);
+
+                    LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) positiveButton.getLayoutParams();
+                    layoutParams.weight = 1000;
+                    positiveButton.setLayoutParams(layoutParams);
+                    negativeButton.setLayoutParams(layoutParams);
+                    //negativeButton.setLayoutParams(positiveButtonLayoutParams);
+                    //positiveButton.setLayoutParams(params);
                 }
 
                 return true;
@@ -504,12 +538,17 @@ public class ListViewAdapter extends BaseAdapter {
         });
     }
 
-    private void displayToastMessage(String message) {
-        Toast toast = Toast.makeText(context, message, Toast.LENGTH_LONG);
-        TextView v = toast.getView().findViewById(android.R.id.message);
-        toast.setGravity(Gravity.CENTER,0,0);
-        if( v != null) v.setGravity(Gravity.CENTER);
-        toast.show();
+    private void displayToastMessage(final String message) {
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast toast = Toast.makeText(context, message, Toast.LENGTH_LONG);
+                TextView v = toast.getView().findViewById(android.R.id.message);
+                toast.setGravity(Gravity.CENTER,0,0);
+                if( v != null) v.setGravity(Gravity.CENTER);
+                toast.show();
+            }
+        });
     }
 
     class ViewHolder{
